@@ -1,34 +1,37 @@
-'use strict';
+// BUG FIXED) PERCENTAGE OVERFLOWING
+
 const Operator = (function() {
-  function Accumulate(init, acc, name) {
-    this.init = init;
+  function Accumulate(init, acc, name, unit) {
+    this.init = document.querySelector(init);
     this.acc = acc;
-    this.name = (this.name === 'undefined' || this.name instanceof String) ?
-    console.error(`${this.name} is curretly undefined or is not a String.`) : name;
-    this.array = [];
+    this.name = name;
+    this.unit = unit;
     this.convert(this.result);
   }
   Accumulate.prototype = {
     convert: function(callback) {
+      let defaultDisplay = this.init.style.display;
+      this.init.style.display = 'none';
       let bind = callback.bind(this),
-          getStyle = window.getComputedStyle(this.init),
-          getValue = getStyle.getPropertyValue(this.name),
-          S2N = parseInt(getValue, 10);
+          getValues = window.getComputedStyle(this.init, null).getPropertyValue(this.name),
+          S2N = parseInt(getValues, 10);
+      this.init.style.display = defaultDisplay;
       bind(S2N);
     },
-    result: function(initVal) {
-      let getNewValue = initVal + this.acc;
-      this.init.style.top = getNewValue + 'px';
+    result: function(value) {
+      let getNewValue = value + this.acc;
+      this.init.style.left = getNewValue + this.unit;
     }
   }
   return {
-    assemble: (init, acc, name) => {
-      new Accumulate(init, acc, name);
+    assemble: (init, acc, name, unit) => {
+      new Accumulate(init, acc, name, unit);
     }
   }
 }());
 
-let target = document.querySelector('.text');
+//==============================================
+
 setInterval(() => {
-  Operator.assemble(target, 20, 'top');
+  Operator.assemble('.content', 10, 'left', '%');
 }, 1000);
